@@ -2,11 +2,48 @@ version: "3.9"
 
 services:
   app:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
     image: labyrinth-temporal-hunt:latest
     container_name: labyrinth-temporal-hunt
     env_file:
       - .env
+    environment:
+      - PYTHONPATH=/app/src
+      - APP_MODE=production
+      - LOG_LEVEL=INFO
     ports:
       - "8501:8501"
+    volumes:
+      - ./logs:/app/logs
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - labyrinth-network
+
+  # Optional: Redis for session storage (if needed for scaling)
+  redis:
+    image: redis:7-alpine
+    container_name: labyrinth-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - labyrinth-network
+    profiles:
+      - redis
+
+volumes:
+  redis_data:
+
+networks:
+  labyrinth-network:
+    driver: bridge
