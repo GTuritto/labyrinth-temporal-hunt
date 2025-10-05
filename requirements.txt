@@ -1,0 +1,11 @@
+pydantic>=2
+langgraph
+streamlit
+python-dotenv
+google-generativeai
+mistralai
+pytest
+pytest-cov
+rich
+uvloop
+loguru
